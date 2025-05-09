@@ -12,6 +12,7 @@ const userSchema = new Schema(
             trim: true,
             index: true 
             // index true means searching field enable (optimize)
+            // Optimize for search queries on this field.
         },
         email:{
             type: String,
