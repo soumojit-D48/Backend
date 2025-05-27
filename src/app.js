@@ -31,11 +31,11 @@ import userRouter from './routes/user.routes.js'
 // standerd practice
 app.use("/api/v1/users", userRouter) // after /user I pass it to userRouter
 
-// http://localost:8000/users/register
+// http://localhost:8000/users/register
 // /user to /register
 
 // standerd practice
-// http://localost:8000/api/v1/users/register
+// http://localhost:8000/api/v1/users/register
 
 
 
