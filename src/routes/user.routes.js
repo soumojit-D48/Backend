@@ -25,11 +25,16 @@ router.route("/login").post(loginUser)
 router.route("/logout").post(varifyJWT, logoutUser)
 // you can add as many as middleware
 
-// varifyJWT -> middleware
-// logoutUser -> next
-// imp** dont execute the fn() just give the refrence
+    /*
+    // varifyJWT -> middleware
+    // logoutUser -> next
+    // imp** dont execute the fn() just give the refrence
 
-/* setTimeout(sayHello, 2000);   // ✅ correct – pass the function // it execute later
-setTimeout(sayHello(), 2000); // ❌ wrong – calls immediately */ 
+    setTimeout(sayHello, 2000);   // ✅ correct – pass the function // it execute later
+    setTimeout(sayHello(), 2000); // ❌ wrong – calls immediately  
+    */
+
+    router.route("/refresh-token").post(refreshAccessToken)
+
 
 export default router

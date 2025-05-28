@@ -3,6 +3,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js"
 import { uploadOnCloudinary } from "../utils/cloudinary.js"
 import { ApiResponse } from "../utils/ApiResponse.js";
+import jwt from "jsonwebtoken"
 
 
 const generateAccessTokenRefreshTokens = async(userId) => {
@@ -133,13 +134,14 @@ const loginUser = asyncHandler(async (req, res) => {
 
     const {email,username, password} = req.body
 
-    if(!username || !email){
+    if(!(username || email)){
         throw new ApiError(400,"username or email is required!")
     }
 
     const user = await User.findOne({ // user is new user
         $or: [{username},{email}] // User is the user already in db we just find it in db
     })
+    console.log("Found user:", user);
 
     if(!user){
         throw new ApiError(404, "User does not exist")
@@ -196,6 +198,7 @@ const loginUser = asyncHandler(async (req, res) => {
 
 })
 
+
 const logoutUser = asyncHandler(async(req, res) => {
 
     /*
@@ -247,11 +250,75 @@ const logoutUser = asyncHandler(async(req, res) => {
     .json( new ApiResponse(200, {}, "User logged Out"))
 })
 
+/*
+Access Token - Short lived, not stored in db
+Refresh Token - Long lived, stored in db
+When access token expires, the frontend sends the refresh token to the backend to validate user (login), once again.
+ */
 
+/* 
+after 401 request when access token expires, hit an endpoint and refresh the access token means get a new access token.
+
+with the request send the refresh token and match the refresh token with db refresh token if same then start the session again
+  */
+
+const refreshAccessToken = asyncHandler(async(req, res) => {
+    const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken
+
+    if(!incomingRefreshToken){
+        throw new ApiError(401, "unauthorized request")
+    }
+    // Have to decode the token the token db is raw but user have the token is encrypted so we have to decode it then have to comare with db ref token
+
+    try {
+        const decodedToken = jwt.verify(
+            incomingRefreshToken,
+            process.env.REFRESH_TOKEN_SECRET
+        )
+    
+        const user = await User.findById(decodedToken?._id)
+    
+        if(!user){
+            throw new ApiError(401, "Invalid Refresh Token")
+        }
+    
+        // Match incomingRefreshToken and after decoded it the user we found in db that user's refresh Token already saved(generateAccessTokenRefreshTokens())
+        //  so we have to check this user is the user in db or not
+    
+        if(incomingRefreshToken !== user?.refreshToken){
+            throw new ApiError(401, "Refresh token is already used")
+        }
+        // now all set generate new access and refresh token
+    
+        const {accessToken, newRefreshToken} = await generateAccessTokenRefreshTokens(user._id)
+    
+        const options = {
+            httpOnly: true,
+            secure: true
+        }
+    
+        return res
+        .status(200)
+        .cookie("accessToken", accessToken, options)
+        .cookie("refreshToken", newRefreshToken, options)
+        .json(
+            new ApiResponse(
+                200,
+                {accessToken, refreshToken: newRefreshToken },
+                "Access token refreshed"
+            )
+        )
+    } catch (error) {
+        throw new ApiError(401, error?.message || "Invalid refresh token")
+    }
+
+
+})
 
 
 export { 
     registerUser,
     loginUser,
-    logoutUser 
+    logoutUser,
+    refreshAccessToken
 }
