@@ -31,7 +31,8 @@ export const varifyJWT = asyncHandler(async(req, _,next) => { // (async(req, res
         }
     
         req.user = user
-        next()
+        next() // after injecting the middleware varifyJWT, next() is that method which is the need to called after the middleware
+        
     } catch (error) {
         throw new ApiError(401, error?.message || "Invalid Access Token")
     }
