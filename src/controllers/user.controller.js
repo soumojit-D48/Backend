@@ -1,7 +1,7 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js"
-import { uploadOnCloudinary } from "../utils/cloudinary.js"
+import { uploadOnCloudinary, deleteFromCloudinary } from "../utils/cloudinary.js"
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken"
 
@@ -389,6 +389,11 @@ const updateUserAvater = asyncHandler(async(req, res) => {
         throw new ApiError(400, "Error while uploading avater")
     }
 
+    const existingUser = user.findById(req.user?._id)
+    if(existingUser?.avater){
+        await deleteFromCloudinary(existingUser.avater)
+    }
+
     const user = User.findByIdAndUpdate(
         req.user?._id,
         {
@@ -404,6 +409,7 @@ const updateUserAvater = asyncHandler(async(req, res) => {
     .json(new ApiResponse(200, user, "Avater updated successfully"))
 })
 
+
 const updateUserCoverImage = asyncHandler(async(req, res) => {
     const coverImageLocalPath = req.file?.path
 
@@ -412,9 +418,14 @@ const updateUserCoverImage = asyncHandler(async(req, res) => {
     }
 
     const coverImage = await uploadOnCloudinary(coverImageLocalPath)
-
+    
     if(!coverImage.url){
         throw new ApiError(400, "Error while uploading Cover Image")
+    }
+
+    const existingUser = await User.findById(req.user?._id)
+    if(existingUser?.coverImage){
+        await deleteFromCloudinary(existingUser.coverImage)
     }
 
     const user = User.findByIdAndUpdate(
@@ -434,11 +445,13 @@ const updateUserCoverImage = asyncHandler(async(req, res) => {
 
 
 
+
 export { 
     registerUser,
     loginUser,
     logoutUser,
     refreshAccessToken,
+    changeCurrentPassword,
     getCurrentUser,
     updateAccountDetails,
     updateUserAvater,

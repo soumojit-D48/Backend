@@ -10,6 +10,7 @@ cloudinary.config({
 
 
 const uploadOnCloudinary = async (localFilePath) => {
+    // if (!localFilePath) return null;
     try {
         if(!localFilePath) return null;
         // upload the file on cloudinary
@@ -31,7 +32,33 @@ const uploadOnCloudinary = async (localFilePath) => {
     }
 }
 
-export { uploadOnCloudinary }
+// https://res.cloudinary.com/<cloud_name>/image/upload/v1234567890/folder/filename.jpg
+
+const deleteFromCloudinary = async(fileUrl) => {
+    try {
+        if(!fileUrl) return
+
+        // extract everything after “…/upload/”
+        const afterUpload = fileUrl.split("/upload/")[1]
+        if(!afterUpload) return
+            /* fileUrl = ".../upload/v1716987543/ profile/user123.jpg"
+            afterUpload = "v1716987543/profile/user123.jpg" */
+
+        // strip file extension
+        const [publicIdWithVersion] = afterUpload.split(".")
+            /* This removes the file extension. .jpg, .png, .webp */
+
+        //drop leading “v123456789/” if present
+        const publicId = publicIdWithVersion.replace(/^v\d+\//,"")
+
+        await cloudinary.uploader.destroy(publicId)
+
+    } catch (err) {
+        console.error("Cloudinary delete failed:", err.message)
+    }
+}
+
+export { uploadOnCloudinary, deleteFromCloudinary }
 
 
 
