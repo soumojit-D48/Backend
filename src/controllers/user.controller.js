@@ -230,8 +230,12 @@ const logoutUser = asyncHandler(async(req, res) => {
     User.findByIdAndUpdate(
         await req.user._id, // find
         {
-            $set: { // mongodb oparetor
-                refreshToken: undefined
+            // $set: { // mongodb oparetor
+            //     refreshToken: undefined
+            // }
+            $unset: {
+                refreshToken: 1,
+                // this removes the field from doccument
             }
         },
         { // we want updated value undefined not the old ref token
