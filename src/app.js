@@ -39,4 +39,4 @@ app.use("/api/v1/users", userRouter) // after /user I pass it to userRouter
 
 
 
-export {app}
+export { app }
