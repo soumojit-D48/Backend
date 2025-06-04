@@ -3,7 +3,7 @@ import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
 
 const commentScema = new Schema(
     {
-        contest: {
+        content: {
             type: String,
             required: true
         },
