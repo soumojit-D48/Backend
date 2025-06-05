@@ -6,7 +6,6 @@ import {ApiResponse} from "../utils/ApiResponse.js"
 import {asyncHandler} from "../utils/asyncHandler.js"
 
 
-
 // Toggle subscription: Subscribe if not already subscribed, otherwise unsubscribe
 
 const toggleSubscription = asyncHandler(async(req, res) => {
@@ -43,6 +42,7 @@ const toggleSubscription = asyncHandler(async(req, res) => {
     }
 })
 
+
 const getUserChannelSubscribers = asyncHandler(async(req, res) => {
    // Get all subscribers of a specific channel
     const {channelId} = req.params
@@ -56,7 +56,6 @@ const getUserChannelSubscribers = asyncHandler(async(req, res) => {
     .lean()
 
 })
-
 
 
 const getSubscribedChannels = asyncHandler(async(req, res) => {
@@ -75,5 +74,5 @@ const getSubscribedChannels = asyncHandler(async(req, res) => {
 export {
     toggleSubscription,
     getUserChannelSubscribers,
-
+    getSubscribedChannels
 }
